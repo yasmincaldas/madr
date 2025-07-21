@@ -10,7 +10,8 @@ requires-python = ">=3.12,<4.0"
 dependencies = [
     "fastapi[standard] (>=0.115.14,<0.116.0)",
     "fastapi-users[sqlalchemy] (>=14.0.1,<15.0.0)",
-    "asyncpg (>=0.30.0,<0.31.0)"
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "httpx (>=0.28.1,<0.29.0)"
 ]
 
 [tool.poetry]
@@ -22,6 +23,7 @@ pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
 taskipy = "^1.14.1"
 ruff = "^0.12.2"
+pytest-asyncio = "^1.1.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -46,10 +48,12 @@ quote-style = 'single'
 [tool.pytest.ini_options]
 pythonpath = "."
 addopts = '-p no:warnings'
+asyncio_default_fixture_loop_scope = 'function'
+
 
 
 [tool.taskipy.tasks]
 lint = 'ruff check'
 format = 'ruff format'
-run = 'fastapi dev fast_zero/app.py'
+run = 'fastapi dev src/madr/app.py'
 test = 'pytest -s -x --cov=fast_zero -vv'
