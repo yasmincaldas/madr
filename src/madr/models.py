@@ -11,9 +11,8 @@ class Author:
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
     books: Mapped[list['Book']] = relationship(
-        'Book',
         init=False,
-        back_populate='author',
+        back_populates='author',
         cascade='all, delete-orphan',
     )
 
@@ -29,6 +28,7 @@ class Book:
         ForeignKey('authors.id'), nullable=False
     )
 
-    author = Mapped[Author] = relationship(
-        'Author', init=False, back_populates='books'
+    author: Mapped['Author'] = relationship(
+        init=False, back_populates='books'
     )
+

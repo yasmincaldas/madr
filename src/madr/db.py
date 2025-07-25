@@ -11,8 +11,9 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+from madr.settings import Settings
 
-DATABASE_URL = 'sqlite+aiosqlite:///./test.db'
+DATABASE_URL = Settings().DATABASE_URL
 
 
 class Base(DeclarativeBase):
