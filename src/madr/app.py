@@ -5,6 +5,7 @@ from fastapi import Depends, FastAPI
 from madr.db import User, create_db_and_tables
 from madr.schemas import UserCreate, UserRead, UserUpdate
 from madr.users import auth_backend, current_active_user, fastapi_users
+from madr.routers import authors
 
 
 @asynccontextmanager
@@ -41,6 +42,8 @@ app.include_router(
     prefix='/users',
     tags=['users'],
 )
+
+app.include_router(authors.router)
 
 
 @app.get('/authenticated-route')

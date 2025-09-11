@@ -3,6 +3,7 @@ import uuid
 from typing import Annotated
 from fastapi_users import schemas
 from madr.utils import sanitize_string
+from madr.models import Book
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
@@ -28,10 +29,24 @@ class BookSchemaCreate(BaseModel):
         return sanitize_string(title)
 
 
-class AuthorSchemaCreate(BaseModel):
-    name: Annotated[str, Field(min_length=2, max_length=100)]
+class AuthorSchemaBase(BaseModel):
+    name: str
 
     @field_validator('name')
     @classmethod
     def sanitize_name(cls, name: str) -> str:
         return sanitize_string(name)
+
+
+class AuthorSchemaGet(AuthorSchemaBase):
+    id: int
+
+
+class AuthorSchemaCreate(AuthorSchemaBase):
+    pass
+
+
+class AuthorSchemaUpdate(AuthorSchemaBase):
+    pass
+
+

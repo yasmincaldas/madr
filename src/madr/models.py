@@ -28,7 +28,4 @@ class Book:
         ForeignKey('authors.id'), nullable=False
     )
 
-    author: Mapped['Author'] = relationship(
-        init=False, back_populates='books'
-    )
-
+    author: Mapped['Author'] = relationship(init=False, back_populates='books')
