@@ -26,6 +26,7 @@ pytest-cov = "^6.2.1"
 taskipy = "^1.14.1"
 ruff = "^0.12.2"
 pytest-asyncio = "^1.1.0"
+factory-boy = "^3.3.3"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

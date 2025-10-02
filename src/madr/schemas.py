@@ -23,19 +23,9 @@ class BookSchemaCreate(BaseModel):
     title: str
     author_id: int
 
-    @field_validator('title')
-    @classmethod
-    def sanitize_title(cls, title: str) -> str:
-        return sanitize_string(title)
-
 
 class AuthorSchemaBase(BaseModel):
     name: str
-
-    @field_validator('name')
-    @classmethod
-    def sanitize_name(cls, name: str) -> str:
-        return sanitize_string(name)
 
 
 class AuthorSchemaGet(AuthorSchemaBase):
@@ -48,5 +38,3 @@ class AuthorSchemaCreate(AuthorSchemaBase):
 
 class AuthorSchemaUpdate(AuthorSchemaBase):
     pass
-
-
