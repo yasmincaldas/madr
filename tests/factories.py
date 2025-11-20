@@ -1,5 +1,6 @@
 import factory
 from madr.models import Author
+from madr.db import User
 
 
 class UserFactory(factory.Factory):

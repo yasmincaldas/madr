@@ -1,5 +1,6 @@
 import pytest
 from madr.db import User
+from madr.models import Author
 from sqlalchemy import select
 
 
@@ -15,3 +16,19 @@ async def test_create_user_db(session):
     )
 
     assert result.email == 'test@gmail.com'
+
+
+@pytest.mark.asyncio
+async def test_create_author_db(session):
+    user = Author(
+        name='exemple',
+    )
+
+    session.add(user)
+    await session.commit()
+
+    result = await session.scalar(
+        select(Author).where(Author.name == 'exemple')
+    )
+
+    assert result.name == 'exemple'

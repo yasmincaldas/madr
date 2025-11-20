@@ -38,3 +38,9 @@ class AuthorSchemaCreate(AuthorSchemaBase):
 
 class AuthorSchemaUpdate(AuthorSchemaBase):
     pass
+
+
+class AuthorSchemaFilter(BaseModel):
+    limit: int = Field(100, gt=0, le=100)
+    offset: int = Field(0, ge=0)
+    tags: list[str] = []
