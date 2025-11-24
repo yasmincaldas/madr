@@ -38,20 +38,19 @@ async def session():
         await conn.run_sync(table_registry.metadata.drop_all)
 
 
-@pytest_asyncio.fixture
-async def client(session):
-    async def override_get_async_session():
+@pytest_asyncio.fixture(autouse=True)
+async def override_get_async_session(session):
+    async def _override():
         yield session
 
-    app.dependency_overrides[get_async_session] = override_get_async_session
-
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url='http://testserver'
-    ) as c:
-        yield c
-
+    app.dependency_overrides[get_async_session] = _override
+    yield
     app.dependency_overrides.clear()
 
+@pytest_asyncio.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        yield ac
 
 @pytest_asyncio.fixture
 async def user(session):

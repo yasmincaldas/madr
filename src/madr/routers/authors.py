@@ -8,6 +8,8 @@ from madr.schemas import AuthorSchemaCreate, AuthorSchemaGet
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Author
 
+from sqlalchemy import select
+
 router = APIRouter(prefix='/authors', tags=['authors'])
 
 
