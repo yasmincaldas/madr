@@ -26,10 +26,17 @@ async def add_author(
     author: AuthorSchemaCreate,
     user: User = Depends(current_active_user),
 ):
-    sanitize_name = sanitize_string(author.name)
+
+    author_db = await session.scalar(select(Author).where(Author.name == sanitize_string(author.name)))
+
+    if author_db:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail='Esse autor já consta no MADR.'
+        )
 
     new_author = Author(
-        name=sanitize_name,
+        name=sanitize_string(author.name),
     )
 
     session.add(new_author)
