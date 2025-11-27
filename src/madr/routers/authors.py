@@ -4,11 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from madr.users import current_active_user
 
-from madr.schemas import AuthorSchemaCreate, AuthorSchemaGet
+from madr.schemas import AuthorSchemaCreate, AuthorSchemaGet, Message
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Author
+from madr.utils import sanitize_string
 
 from sqlalchemy import select
+
 
 router = APIRouter(prefix='/authors', tags=['authors'])
 
@@ -24,8 +26,10 @@ async def add_author(
     author: AuthorSchemaCreate,
     user: User = Depends(current_active_user),
 ):
+    sanitize_name = sanitize_string(author.name)
+
     new_author = Author(
-        name=author.name,
+        name=sanitize_name,
     )
 
     session.add(new_author)
@@ -35,14 +39,31 @@ async def add_author(
     return new_author
 
 
-@router.get('/', response_model=AuthorSchemaGet)
+@router.get('/{author_id}', response_model=AuthorSchemaGet)
 async def get_author_by_id(session: T_Session, author_id: int):
     author = await session.scalar(select(Author).where(Author.id == author_id))
 
     if not author:
-        raise HTTPExeption(
+        raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Autor não consta no MADR.',
         )
 
     return author
+
+
+@router.delete('/{author_id}', response_model=Message)
+async def delete_author_by_id(session: T_Session, author_id: int):
+    author_db = await session.scalar(select(Author).where(Author.id == author_id))
+
+    if not author_db:
+        raise HTTPException(
+            status_code= HTTPStatus.NOT_FOUND,
+            detail='Autor não encontrado.'
+        )
+
+    session.delete(author_db)
+    await session.commit()
+
+    return {'message': f'O autor {author_db.name} foi deletado.'}
+

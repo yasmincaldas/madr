@@ -36,7 +36,11 @@ class AuthorSchemaCreate(AuthorSchemaBase):
     pass
 
 
-class AuthorSchemaUpdate(AuthorSchemaBase):
+class Message(BaseModel):
+    message: str
+
+
+class AuthorSchemaDelete():
     pass
 
 

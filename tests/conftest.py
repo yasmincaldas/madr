@@ -47,10 +47,14 @@ async def override_get_async_session(session):
     yield
     app.dependency_overrides.clear()
 
+
 @pytest_asyncio.fixture
 async def client():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url='http://testserver'
+    ) as ac:
         yield ac
+
 
 @pytest_asyncio.fixture
 async def user(session):
@@ -79,4 +83,7 @@ async def token(client, user):
         data=data,
         headers={'Content-Type': 'application/x-www-form-urlencoded'},
     )
+
+    data = response.json()
+    print(data)
     return response.json()['access_token']
