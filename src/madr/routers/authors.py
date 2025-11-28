@@ -7,7 +7,6 @@ from madr.users import current_active_user
 from madr.schemas import AuthorSchemaCreate, AuthorSchemaGet, Message
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Author
-from madr.utils import sanitize_string
 
 from sqlalchemy import select
 
@@ -27,7 +26,7 @@ async def add_author(
     user: User = Depends(current_active_user),
 ):
 
-    author_db = await session.scalar(select(Author).where(Author.name == sanitize_string(author.name)))
+    author_db = await session.scalar(select(Author).where(Author.name == author.name))
 
     if author_db:
         raise HTTPException(
@@ -36,7 +35,7 @@ async def add_author(
         )
 
     new_author = Author(
-        name=sanitize_string(author.name),
+        name=author.name
     )
 
     session.add(new_author)

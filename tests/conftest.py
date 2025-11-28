@@ -13,6 +13,7 @@ from madr.db import User
 from fastapi_users.password import PasswordHelper
 from madr.db import Base, get_async_session
 from madr.models import table_registry
+from .factories import AuthorFactory
 
 
 from fastapi_users.password import PasswordHelper
@@ -87,3 +88,12 @@ async def token(client, user):
     data = response.json()
     print(data)
     return response.json()['access_token']
+
+@pytest_asyncio.fixture
+async def author(session):
+    author = AuthorFactory(name='test author')
+    session.add(author)
+    await session.commit()
+    await session.refresh(author)
+    
+    return author

@@ -14,6 +14,16 @@ async def test_add_author(client, token):
 
     assert response.json() == {'name': 'Machado de Assis'}
 
+@pytest.mark.asyncio
+async def test_add_author_conflict_error(client, session, token, author):
+    response = await client.post(
+        '/authors/',
+        json={'name': author.name},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    print(response.json())
+
+    assert response.status_code == HTTPStatus.CONFLICT
 
 @pytest.mark.asyncio
 async def test_get_author_by_id(client, session, token):
@@ -59,3 +69,4 @@ async def test_delete_author_by_id(client, session, token):
     )
 
     assert response.status_code == HTTPStatus.OK
+

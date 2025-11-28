@@ -14,5 +14,5 @@ class UserFactory(factory.Factory):
 class AuthorFactory(factory.Factory):
     class Meta:
         model = Author
-
+        
     name = factory.Sequence(lambda n: f'test{n}')

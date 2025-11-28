@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 import uuid
 from typing import Annotated
 from fastapi_users import schemas
@@ -26,6 +26,10 @@ class BookSchemaCreate(BaseModel):
 
 class AuthorSchemaBase(BaseModel):
     name: str
+
+    @validator("name")
+    def sanitize_name(cls, v):
+        return sanitize_string(v)
 
 
 class AuthorSchemaGet(AuthorSchemaBase):

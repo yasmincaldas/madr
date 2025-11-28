@@ -1,5 +1,8 @@
-def sanitize_string(cls, value: str) -> str:
-    value = value.strip()
-    value = value.lower()
-    value = re.sub(r'\s+', ' ', value)
-    return value
+import re
+
+
+def sanitize_string(data: str) -> str:
+    data = data.casefold().strip()
+    data = re.sub(r'[^a-zà-ú\s]', '', data)
+    data = ' '.join(data.split())
+    return data
