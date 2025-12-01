@@ -101,9 +101,14 @@ async def patch_author(
 
     author_db.name = author.name
     
-    session.add(author_db)
-    await session.commit()
-    await session.refresh(author_db)
-    return author_db
+    try:
+        session.add(author_db)
+        await session.commit()
+        await session.refresh(author_db)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT, detail='Author já consta no MADR.'
+        )
 
+    return author_db
 
