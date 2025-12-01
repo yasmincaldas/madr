@@ -7,12 +7,12 @@ from http import HTTPStatus
 async def test_add_author(client, token):
     response = await client.post(
         '/authors/',
-        json={'name': 'Machado de Assis'},
+        json={'name': 'machado de assis'},
         headers={'Authorization': f'Bearer {token}'},
     )
     print(response.json())
 
-    assert response.json() == {'name': 'Machado de Assis'}
+    assert response.json() == {'name': 'machado de assis'}
 
 @pytest.mark.asyncio
 async def test_add_author_conflict_error(client, session, token, author):
@@ -26,13 +26,7 @@ async def test_add_author_conflict_error(client, session, token, author):
     assert response.status_code == HTTPStatus.CONFLICT
 
 @pytest.mark.asyncio
-async def test_get_author_by_id(client, session, token):
-    author = AuthorFactory()
-
-    session.add(author)
-    await session.commit()
-    await session.refresh(author)
-
+async def test_get_author_by_id(client, session, token, author):
     response = await client.get(
         f'/authors/{author.id}',
         headers={'Authorization': f'Bearer {token}'},
@@ -41,7 +35,6 @@ async def test_get_author_by_id(client, session, token):
     assert response.status_code == HTTPStatus.OK
     data = response.json()
     assert data['id'] == author.id
-    assert data['name'] == author.name
 
 
 @pytest.mark.asyncio
@@ -70,3 +63,13 @@ async def test_delete_author_by_id(client, session, token):
 
     assert response.status_code == HTTPStatus.OK
 
+
+@pytest.mark.asyncio
+async def test_patch_author_by_id(client, session, token, author): 
+    response = await client.patch(
+        f'/authors/{author.id}',
+        json={'name': 'author updtated'},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.OK

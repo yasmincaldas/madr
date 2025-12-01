@@ -43,6 +43,8 @@ class AuthorSchemaCreate(AuthorSchemaBase):
 class Message(BaseModel):
     message: str
 
+class AuthorSchemaPublic(AuthorSchemaBase):
+    id: int
 
 class AuthorSchemaDelete():
     pass

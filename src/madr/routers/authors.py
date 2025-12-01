@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from madr.users import current_active_user
 
-from madr.schemas import AuthorSchemaCreate, AuthorSchemaGet, Message
+from madr.schemas import AuthorSchemaCreate, AuthorSchemaGet, Message, AuthorSchemaPublic, AuthorSchemaBase
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Author
 
@@ -46,7 +46,12 @@ async def add_author(
 
 
 @router.get('/{author_id}', response_model=AuthorSchemaGet)
-async def get_author_by_id(session: T_Session, author_id: int):
+async def get_author_by_id(
+    session: T_Session, 
+    author_id: int,
+    user: User = Depends(current_active_user),
+    ):
+
     author = await session.scalar(select(Author).where(Author.id == author_id))
 
     if not author:
@@ -59,17 +64,46 @@ async def get_author_by_id(session: T_Session, author_id: int):
 
 
 @router.delete('/{author_id}', response_model=Message)
-async def delete_author_by_id(session: T_Session, author_id: int):
+async def delete_author_by_id(
+    session: T_Session, 
+    author_id: int,
+    user: User = Depends(current_active_user),
+    ):
+
     author_db = await session.scalar(select(Author).where(Author.id == author_id))
 
     if not author_db:
         raise HTTPException(
             status_code= HTTPStatus.NOT_FOUND,
-            detail='Autor não encontrado.'
+            detail='Autor não consta no MADR.'
         )
 
     session.delete(author_db)
     await session.commit()
 
     return {'message': f'O autor {author_db.name} foi deletado.'}
+
+@router.patch('/{author_id}', response_model=AuthorSchemaPublic)
+async def patch_author(
+    session: T_Session, 
+    author_id: int, 
+    author: AuthorSchemaBase,
+    user: User = Depends(current_active_user),
+    ):
+
+    author_db = await session.scalar(select(Author).where(Author.id == author_id))
+
+    if not author_db:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Autor não consta no MADR.'
+        )
+
+    author_db.name = author.name
+    
+    session.add(author_db)
+    await session.commit()
+    await session.refresh(author_db)
+    return author_db
+
 
