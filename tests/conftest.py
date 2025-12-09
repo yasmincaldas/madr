@@ -89,11 +89,12 @@ async def token(client, user):
     print(data)
     return response.json()['access_token']
 
+
 @pytest_asyncio.fixture
 async def author(session):
     author = AuthorFactory(name='test author')
     session.add(author)
     await session.commit()
     await session.refresh(author)
-    
+
     return author

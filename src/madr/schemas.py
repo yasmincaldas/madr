@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, ConfigDict
 import uuid
 from typing import Annotated
 from fastapi_users import schemas
@@ -27,7 +27,7 @@ class BookSchemaCreate(BaseModel):
 class AuthorSchemaBase(BaseModel):
     name: str
 
-    @validator("name")
+    @validator('name')
     def sanitize_name(cls, v):
         return sanitize_string(v)
 
@@ -43,14 +43,16 @@ class AuthorSchemaCreate(AuthorSchemaBase):
 class Message(BaseModel):
     message: str
 
+
 class AuthorSchemaPublic(AuthorSchemaBase):
     id: int
 
-class AuthorSchemaDelete():
+
+class AuthorSchemaDelete:
     pass
 
 
-class AuthorSchemaFilter(BaseModel):
-    limit: int = Field(100, gt=0, le=100)
-    offset: int = Field(0, ge=0)
-    tags: list[str] = []
+class AuthorSchemaList(BaseModel):
+    authors: list[AuthorSchemaPublic] = []
+
+    model_config = ConfigDict(from_attributes=True)

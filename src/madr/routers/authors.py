@@ -4,7 +4,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from madr.users import current_active_user
 
-from madr.schemas import AuthorSchemaCreate, AuthorSchemaGet, Message, AuthorSchemaPublic, AuthorSchemaBase
+from madr.schemas import (
+    AuthorSchemaCreate,
+    AuthorSchemaGet,
+    Message,
+    AuthorSchemaPublic,
+    AuthorSchemaBase,
+    AuthorSchemaList,
+)
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Author
 
@@ -25,18 +32,17 @@ async def add_author(
     author: AuthorSchemaCreate,
     user: User = Depends(current_active_user),
 ):
-
-    author_db = await session.scalar(select(Author).where(Author.name == author.name))
+    author_db = await session.scalar(
+        select(Author).where(Author.name == author.name)
+    )
 
     if author_db:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
-            detail='Esse autor já consta no MADR.'
+            detail='Esse autor já consta no MADR.',
         )
 
-    new_author = Author(
-        name=author.name
-    )
+    new_author = Author(name=author.name)
 
     session.add(new_author)
     await session.commit()
@@ -47,11 +53,10 @@ async def add_author(
 
 @router.get('/{author_id}', response_model=AuthorSchemaGet)
 async def get_author_by_id(
-    session: T_Session, 
+    session: T_Session,
     author_id: int,
     user: User = Depends(current_active_user),
-    ):
-
+):
     author = await session.scalar(select(Author).where(Author.id == author_id))
 
     if not author:
@@ -65,17 +70,18 @@ async def get_author_by_id(
 
 @router.delete('/{author_id}', response_model=Message)
 async def delete_author_by_id(
-    session: T_Session, 
+    session: T_Session,
     author_id: int,
     user: User = Depends(current_active_user),
-    ):
-
-    author_db = await session.scalar(select(Author).where(Author.id == author_id))
+):
+    author_db = await session.scalar(
+        select(Author).where(Author.id == author_id)
+    )
 
     if not author_db:
         raise HTTPException(
-            status_code= HTTPStatus.NOT_FOUND,
-            detail='Autor não consta no MADR.'
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Autor não consta no MADR.',
         )
 
     session.delete(author_db)
@@ -83,24 +89,26 @@ async def delete_author_by_id(
 
     return {'message': f'O autor {author_db.name} foi deletado.'}
 
+
 @router.patch('/{author_id}', response_model=AuthorSchemaPublic)
 async def patch_author(
-    session: T_Session, 
-    author_id: int, 
+    session: T_Session,
+    author_id: int,
     author: AuthorSchemaBase,
     user: User = Depends(current_active_user),
-    ):
-
-    author_db = await session.scalar(select(Author).where(Author.id == author_id))
+):
+    author_db = await session.scalar(
+        select(Author).where(Author.id == author_id)
+    )
 
     if not author_db:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Autor não consta no MADR.'
+            detail='Autor não consta no MADR.',
         )
 
     author_db.name = author.name
-    
+
     try:
         session.add(author_db)
         await session.commit()
@@ -112,3 +120,18 @@ async def patch_author(
 
     return author_db
 
+
+@router.get('/', response_model=AuthorSchemaList)
+async def get_authors(
+    session: T_Session,
+    name: str | None = None,
+    offset: int | None = 0,
+    limit: int | None = 20,
+):
+    query = select(Author)
+    if name:
+        query = query.filter(Author.name.contains(name))
+
+    authors = await session.scalars(query.offset(offset).limit(limit))
+
+    return {'authors': authors.all()}

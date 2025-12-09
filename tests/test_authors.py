@@ -14,6 +14,7 @@ async def test_add_author(client, token):
 
     assert response.json() == {'name': 'machado de assis'}
 
+
 @pytest.mark.asyncio
 async def test_add_author_conflict_error(client, session, token, author):
     response = await client.post(
@@ -24,6 +25,7 @@ async def test_add_author_conflict_error(client, session, token, author):
     print(response.json())
 
     assert response.status_code == HTTPStatus.CONFLICT
+
 
 @pytest.mark.asyncio
 async def test_get_author_by_id(client, session, token, author):
@@ -65,7 +67,7 @@ async def test_delete_author_by_id(client, session, token):
 
 
 @pytest.mark.asyncio
-async def test_patch_author_by_id(client, session, token, author): 
+async def test_patch_author_by_id(client, session, token, author):
     response = await client.patch(
         f'/authors/{author.id}',
         json={'name': 'author updtated'},
@@ -73,3 +75,24 @@ async def test_patch_author_by_id(client, session, token, author):
     )
 
     assert response.status_code == HTTPStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_get_authors(client, session, token):
+    authors = AuthorFactory.create_batch(5)
+    author1 = authors[0]
+    author2 = authors[1]
+
+    author1.name = 'kant'
+    author2.name = 'thoreal'
+
+    session.add_all(authors)
+    await session.commit()
+
+    response = await client.get(
+        '/authors/?name=a',
+        headers={'Authorization': f'Bearer {token}'},
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
