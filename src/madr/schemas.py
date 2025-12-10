@@ -18,10 +18,19 @@ class UserUpdate(schemas.BaseUserUpdate):
     pass
 
 
-class BookSchemaCreate(BaseModel):
+class BookSchemaBase(BaseModel):
     year: int
     title: str
     author_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+    @validator('title')
+    def sanitize_name(cls, v):
+        return sanitize_string(v)
+
+
+class BookSchemaCreate(BookSchemaBase):
+    id: int
 
 
 class AuthorSchemaBase(BaseModel):

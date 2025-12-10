@@ -92,7 +92,6 @@ async def test_get_authors(client, session, token):
     response = await client.get(
         '/authors/?name=a',
         headers={'Authorization': f'Bearer {token}'},
-        follow_redirects=True,
     )
 
     assert response.status_code == 200

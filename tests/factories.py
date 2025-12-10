@@ -1,5 +1,5 @@
 import factory
-from madr.models import Author
+from madr.models import Author, Book
 from madr.db import User
 
 
@@ -16,3 +16,12 @@ class AuthorFactory(factory.Factory):
         model = Author
 
     name = factory.Sequence(lambda n: f'test{n}')
+
+
+class BookFactory(factory.Factory):
+    class Meta:
+        model = Book
+
+    year = factory.Sequence(lambda n: 1980 + n)
+    title = factory.Sequence(lambda n: f'Book {n}')
+    author_id = factory.Sequence(lambda n: n + 1)
