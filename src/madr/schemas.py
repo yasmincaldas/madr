@@ -32,6 +32,10 @@ class BookSchemaCreate(BookSchemaBase):
     id: int
 
 
+class BookSchemaGet(BookSchemaBase):
+    id: int
+
+
 class AuthorSchemaBase(BaseModel):
     name: str
 

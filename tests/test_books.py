@@ -30,3 +30,24 @@ async def test_add_book_integrity_error(client, token, book):
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
+
+
+@pytest.mark.asyncio
+async def test_get_book_by_id(client, token, book):
+    response = await client.get(
+        f'/books/{book.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    data = response.json()
+    assert data['id'] == book.id
+
+@pytest.mark.asyncio
+async def test_get_book_by_id_not_found_error(client, token):
+    response = await client.get(
+        f'/books/999',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND

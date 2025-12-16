@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from madr.users import current_active_user
 
-from madr.schemas import BookSchemaCreate, BookSchemaBase
+from madr.schemas import BookSchemaCreate, BookSchemaBase, BookSchemaGet
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Book
 
@@ -42,3 +42,20 @@ async def add_book(
     await session.refresh(new_book)
 
     return new_book
+
+
+@router.get('/{book_id}', response_model=BookSchemaGet)
+async def get_book_by_id(
+    session: T_Session,
+    book_id: int,
+    user: User = Depends(current_active_user)
+):
+    book = await session.scalar(select(Book).where(Book.id == book_id))
+
+    if not book:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Livro não consta no MADR.',
+        )
+
+    return book
