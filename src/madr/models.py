@@ -1,31 +1,42 @@
-from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    registry,
+    relationship,
+    DeclarativeBase,
+)
+from fastapi_users.db import (
+    SQLAlchemyBaseUserTableUUID,
+    SQLAlchemyUserDatabase,
+)
 from sqlalchemy import ForeignKey
 
-table_registry = registry()
+
+class Base(DeclarativeBase):
+    pass
 
 
-@table_registry.mapped_as_dataclass
-class Author:
+class User(SQLAlchemyBaseUserTableUUID, Base):
+    pass
+
+
+class Author(Base):
     __tablename__ = 'authors'
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
+
     books: Mapped[list['Book']] = relationship(
-        init=False,
-        back_populates='author',
-        cascade='all, delete-orphan',
+        back_populates='author', cascade='all, delete-orphan'
     )
 
 
-@table_registry.mapped_as_dataclass
-class Book:
+class Book(Base):
     __tablename__ = 'books'
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     year: Mapped[int]
     title: Mapped[str] = mapped_column(unique=True)
-    author_id: Mapped[int] = mapped_column(
-        ForeignKey('authors.id'), nullable=False
-    )
 
-    author: Mapped['Author'] = relationship(init=False, back_populates='books')
+    author_id: Mapped[int] = mapped_column(ForeignKey('authors.id'))
+    author: Mapped['Author'] = relationship(back_populates='books')

@@ -8,12 +8,10 @@ from sqlalchemy.ext.asyncio import (
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.pool import StaticPool
 from madr.app import app
-from madr.db import Base
-from madr.db import User
+from madr.models import Base, User, Book
 from fastapi_users.password import PasswordHelper
 from madr.db import Base, get_async_session
-from madr.models import table_registry
-from .factories import AuthorFactory
+from .factories import AuthorFactory, BookFactory
 
 
 from fastapi_users.password import PasswordHelper
@@ -29,14 +27,12 @@ async def session():
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        await conn.run_sync(table_registry.metadata.create_all)
 
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(table_registry.metadata.drop_all)
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -98,3 +94,14 @@ async def author(session):
     await session.refresh(author)
 
     return author
+
+
+@pytest_asyncio.fixture
+async def book(session, author):
+    book = Book(year=1854, title='walden', author_id=author.id)
+
+    session.add(book)
+    await session.commit()
+    await session.refresh(book)
+
+    return book

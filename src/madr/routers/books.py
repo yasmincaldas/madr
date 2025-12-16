@@ -26,16 +26,19 @@ async def add_book(
     book: BookSchemaBase,
     user: User = Depends(current_active_user),
 ):
-    book_db = Book(**book.model_dump())
+    book_db = await session.scalar(
+        select(Book).where(Book.title == book.title)
+    )
 
-    try:
-        session.add(book_db)
-        await session.commit()
-        await session.refresh(book_db)
-
-    except IntegrityError:
+    if book_db:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT, detail='Esse livro já existe'
         )
 
-    return book_db
+    new_book = Book(year=book.year, title=book.title, author_id=book.author_id)
+
+    session.add(new_book)
+    await session.commit()
+    await session.refresh(new_book)
+
+    return new_book

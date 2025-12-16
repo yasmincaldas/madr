@@ -1,15 +1,24 @@
 import pytest
-from .factories import BookFactory
 from http import HTTPStatus
 
 
 @pytest.mark.asyncio
-async def test_add_book(session, client, token):
-    book = BookFactory()
-    session.add(book)
-    await session.commit()
-    await session.refresh(book)
+async def test_add_book(session, client, token, author):
+    response = await client.post(
+        '/books/',
+        json={
+            'title': 'os sertoes',
+            'year': 1902,
+            'author_id': author.id,
+        },
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
+    assert response.status_code == HTTPStatus.CREATED
+
+
+@pytest.mark.asyncio
+async def test_add_book_integrity_error(client, token, book):
     response = await client.post(
         '/books/',
         json={
@@ -20,4 +29,4 @@ async def test_add_book(session, client, token):
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert response.status_code == HTTPStatus.CREATED
+    assert response.status_code == HTTPStatus.CONFLICT

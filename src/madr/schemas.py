@@ -22,7 +22,6 @@ class BookSchemaBase(BaseModel):
     year: int
     title: str
     author_id: int
-    model_config = ConfigDict(from_attributes=True)
 
     @validator('title')
     def sanitize_name(cls, v):
