@@ -1,5 +1,6 @@
 import pytest
 from http import HTTPStatus
+from .factories import BookFactory
 
 
 @pytest.mark.asyncio
@@ -51,3 +52,42 @@ async def test_get_book_by_id_not_found_error(client, token):
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_get_books_filter_by_title(client, session, author, token):
+    books = BookFactory.create_batch(5, author_id=author.id)
+    book = books[0]
+    book.title = 'carta sobre a felicidade'
+    session.add_all(books)
+    await session.commit()
+
+    response = await client.get(
+        '/books/?title=fe',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    data = response.json()
+    print(data)
+
+    assert response.status_code == HTTPStatus.OK
+
+
+
+@pytest.mark.asyncio
+async def test_get_books_filter_by_year(client, session, author, token):
+    books = BookFactory.create_batch(5, author_id=author.id)
+    book = books[0]
+    book.year = 1985
+    session.add_all(books)
+    await session.commit()
+
+    response = await client.get(
+        f'/books/?year={book.year}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    data = response.json()
+    print(data)
+
+    assert response.status_code == HTTPStatus.OK

@@ -1,10 +1,10 @@
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, HTTPException
 from madr.users import current_active_user
 
-from madr.schemas import BookSchemaCreate, BookSchemaBase, BookSchemaGet
+from madr.schemas import BookSchemaCreate, BookSchemaBase, BookSchemaGet, BookSchemaList
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Book
 
@@ -59,3 +59,23 @@ async def get_book_by_id(
         )
 
     return book
+
+@router.get('/', response_model=BookSchemaList)
+async def get_books(
+    session: T_Session,
+    title: Union[str, None] = None,
+    year: Union[int, None] = None,
+    offset: int | None = 0,
+    limit: int | None = 20,
+    ):
+    query = select(Book)
+
+    if title:
+        query = query.filter(Book.title.contains(title))
+
+    if year:
+        query = query.filter(Book.year == year)
+
+    books = await session.scalars(query.offset(offset).limit(limit))
+
+    return {'books': books.all()}

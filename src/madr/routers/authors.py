@@ -135,3 +135,5 @@ async def get_authors(
     authors = await session.scalars(query.offset(offset).limit(limit))
 
     return {'authors': authors.all()}
+
+

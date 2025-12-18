@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, validator, ConfigDict
 import uuid
-from typing import Annotated
+from typing import Annotated, List
 from fastapi_users import schemas
 from madr.utils import sanitize_string
 from madr.models import Book
@@ -36,6 +36,10 @@ class BookSchemaGet(BookSchemaBase):
     id: int
 
 
+class BookSchemaList(BaseModel):
+    books: List[BookSchemaBase] = Field(default_factory=list)
+
+    
 class AuthorSchemaBase(BaseModel):
     name: str
 
