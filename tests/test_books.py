@@ -113,6 +113,26 @@ async def test_patch_book_by_id_not_found_error(
         json={'title': 'new title'},
         headers={'Authorization': f'Bearer {token}'},
     )
-    print(response.json())  # Para ver detalhes do erro
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+
+@pytest.mark.asyncio
+async def test_delete_book_by_id(client, session, book, token):
+    response = await client.delete(
+        f'/books/{book.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_delete_book_by_id_not_found_error(client, session, book, token):
+    response = await client.delete(
+        f'/books/999',
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
