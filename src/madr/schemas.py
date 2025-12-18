@@ -36,10 +36,20 @@ class BookSchemaGet(BookSchemaBase):
     id: int
 
 
+class BookSchemaPublic(BookSchemaBase):
+    id: int
+
+
+class BookSchemaUpdate(BaseModel):
+    ano: int | None = None
+    titulo: str | None = None
+    romancista_id: int | None = None
+
+
 class BookSchemaList(BaseModel):
     books: List[BookSchemaBase] = Field(default_factory=list)
 
-    
+
 class AuthorSchemaBase(BaseModel):
     name: str
 

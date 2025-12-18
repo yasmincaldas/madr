@@ -4,7 +4,14 @@ from typing import Annotated, Union
 from fastapi import APIRouter, Depends, HTTPException
 from madr.users import current_active_user
 
-from madr.schemas import BookSchemaCreate, BookSchemaBase, BookSchemaGet, BookSchemaList
+from madr.schemas import (
+    BookSchemaCreate,
+    BookSchemaBase,
+    BookSchemaGet,
+    BookSchemaList,
+    BookSchemaPublic,
+    BookSchemaUpdate,
+)
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Book
 
@@ -46,9 +53,7 @@ async def add_book(
 
 @router.get('/{book_id}', response_model=BookSchemaGet)
 async def get_book_by_id(
-    session: T_Session,
-    book_id: int,
-    user: User = Depends(current_active_user)
+    session: T_Session, book_id: int, user: User = Depends(current_active_user)
 ):
     book = await session.scalar(select(Book).where(Book.id == book_id))
 
@@ -60,6 +65,7 @@ async def get_book_by_id(
 
     return book
 
+
 @router.get('/', response_model=BookSchemaList)
 async def get_books(
     session: T_Session,
@@ -67,7 +73,7 @@ async def get_books(
     year: Union[int, None] = None,
     offset: int | None = 0,
     limit: int | None = 20,
-    ):
+):
     query = select(Book)
 
     if title:
@@ -79,3 +85,50 @@ async def get_books(
     books = await session.scalars(query.offset(offset).limit(limit))
 
     return {'books': books.all()}
+
+
+@router.patch('/{book_id}', response_model=BookSchemaPublic)
+async def patch_book(
+    session: T_Session,
+    book_id: int,
+    book: BookSchemaUpdate,
+    user: User = Depends(current_active_user),
+):
+    book_db = await session.scalar(select(Book).where(Book.id == book_id))
+
+    if not book_db:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Livro não consta no MADR'
+        )
+
+    for key, value in book.model_dump(exclude_unset=True).items():
+        if key == 'title':
+            book_title_db = await session.scalar(
+                select(Book).where(Book.title == value)
+            )
+
+            if book_title_db:
+                raise HTTPException(
+                    status_code=HTTPStatus.CONFLICT,
+                    detail='Esse livro já consta no MADR',
+                )
+            setattr(book_db, key, value)
+        elif key == 'author_id':
+            author_db = await session.scalar(
+                select(Author).where(Author.id == book.author_id)
+            )
+
+            if not author_db:
+                raise HTTPException(
+                    status_code=HTTPStatus.CONFLICT,
+                    detail='Esse autor não consta no MADR',
+                )
+            setattr(book_db, key, value)
+        else:
+            setattr(book_db, key, value)
+
+    session.add(book_db)
+    session.commit()
+    session.refresh(book_db)
+
+    return book_db

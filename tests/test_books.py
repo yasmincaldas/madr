@@ -44,6 +44,7 @@ async def test_get_book_by_id(client, token, book):
     data = response.json()
     assert data['id'] == book.id
 
+
 @pytest.mark.asyncio
 async def test_get_book_by_id_not_found_error(client, token):
     response = await client.get(
@@ -73,7 +74,6 @@ async def test_get_books_filter_by_title(client, session, author, token):
     assert response.status_code == HTTPStatus.OK
 
 
-
 @pytest.mark.asyncio
 async def test_get_books_filter_by_year(client, session, author, token):
     books = BookFactory.create_batch(5, author_id=author.id)
@@ -91,3 +91,28 @@ async def test_get_books_filter_by_year(client, session, author, token):
     print(data)
 
     assert response.status_code == HTTPStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_patch_book_by_id(client, session, book, author, token):
+    response = await client.patch(
+        f'/books/{book.id}',
+        json={'title': 'new title'},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_patch_book_by_id_not_found_error(
+    client, session, book, author, token
+):
+    response = await client.patch(
+        f'/books/999',
+        json={'title': 'new title'},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    print(response.json())  # Para ver detalhes do erro
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
