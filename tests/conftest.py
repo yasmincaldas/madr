@@ -12,18 +12,14 @@ from madr.models import Base, User, Book
 from fastapi_users.password import PasswordHelper
 from madr.db import Base, get_async_session
 from .factories import AuthorFactory, BookFactory
-
+from madr.settings import Settings
 
 from fastapi_users.password import PasswordHelper
 
 
 @pytest_asyncio.fixture
 async def session():
-    engine = create_async_engine(
-        'sqlite+aiosqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+    engine = create_async_engine(Settings().DATABASE_URL)
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
