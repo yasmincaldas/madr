@@ -12,15 +12,21 @@ from madr.models import Base, User, Book
 from fastapi_users.password import PasswordHelper
 from madr.db import Base, get_async_session
 from .factories import AuthorFactory, BookFactory
-from madr.settings import Settings
 
 from fastapi_users.password import PasswordHelper
 
+from testcontainers.postgres import PostgresContainer
 
-@pytest_asyncio.fixture
-async def session():
-    engine = create_async_engine(Settings().DATABASE_URL)
 
+@pytest_asyncio.fixture()
+def engine():
+    with PostgresContainer('postgres:16', driver='psycopg') as postgres:
+        _engine = create_async_engine(postgres.get_connection_url())
+        yield _engine
+
+
+@pytest_asyncio.fixture()
+async def session(engine):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
