@@ -20,7 +20,7 @@ from testcontainers.postgres import PostgresContainer
 
 @pytest_asyncio.fixture()
 def engine():
-    with PostgresContainer('postgres:16', driver='psycopg') as postgres:
+    with PostgresContainer('postgres:16', driver='asyncpg') as postgres:
         _engine = create_async_engine(postgres.get_connection_url())
         yield _engine
 
