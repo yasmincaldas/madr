@@ -11,7 +11,7 @@ from madr.schemas import (
     BookSchemaList,
     BookSchemaPublic,
     BookSchemaUpdate,
-    Message
+    Message,
 )
 from madr.db import User, AsyncSession, get_async_session
 from madr.models import Book
@@ -141,16 +141,14 @@ async def delete_book(
     book_id: int,
     user: User = Depends(current_active_user),
 ):
-    book_db = await session.scalar(
-        select(Book).where(Book.id == book_id)
-    ) 
+    book_db = await session.scalar(select(Book).where(Book.id == book_id))
 
     if not book_db:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Esse livro não consta no MADR'
+            detail='Esse livro não consta no MADR',
         )
-    
+
     await session.delete(book_db)
     await session.commit()
 

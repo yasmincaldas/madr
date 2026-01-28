@@ -117,7 +117,6 @@ async def test_patch_book_by_id_not_found_error(
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-
 @pytest.mark.asyncio
 async def test_delete_book_by_id(client, session, book, token):
     response = await client.delete(
