@@ -6,6 +6,7 @@ from madr.db import User, create_db_and_tables
 from madr.schemas import UserCreate, UserRead, UserUpdate
 from madr.users import auth_backend, current_active_user, fastapi_users
 from madr.routers import authors, books
+from fastapi.responses import RedirectResponse
 
 
 app = FastAPI()
@@ -38,6 +39,11 @@ app.include_router(
 
 app.include_router(authors.router)
 app.include_router(books.router)
+
+
+@app.get('/', include_in_schema=False)
+async def root():
+    return RedirectResponse(url='/docs')
 
 
 @app.get('/authenticated-route')
